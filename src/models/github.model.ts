@@ -12,12 +12,18 @@ const schema = new Schema(
     platform: { type: String, required: true, enum: platforms },
     title: { type: String, required: true, trim: true }, //question title
     difficulty: { type: String, enum: difficulty, default: "easy" },
-    tags: { type: String, trim: true },
+    tags: [{ type: String, trim: true }],
     language: {
       type: String,
       trim: true,
       required: true,
       enum: Object.keys(languageExtensions),
+    },
+    github_folder_path: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
     },
   },
   { timestamps: true, toJSON: { virtuals: true } }
