@@ -32,14 +32,14 @@ const schema = new Schema(
 schema.index({ user_id: 1 });
 schema.index({ user_id: 1, updated_at: -1 });
 
-const UserSubmission = mongoose.model("poko_user_submission", schema);
+const UserSubmission = mongoose.model("poko_submission", schema);
 
 UserSubmission.createIndexes()
   .then(() => {
-    console.log("Indexes created successfully : UserSubmission");
+    console.log("Indexes created successfully : Submission");
   })
   .catch((err: unknown) => {
-    console.error("Error creating indexes UserSubmission:", err);
+    console.error("Error creating indexes Submission:", err);
   });
 
 export default UserSubmission;

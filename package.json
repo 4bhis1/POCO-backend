@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "ts-node src/index.ts",
+    "start": "tsx src/index.ts --watch",
+    "build": "tsc",
+    "serve": "ts-node src/index.ts"
   },
   "author": "",
   "license": "ISC",
@@ -18,5 +22,16 @@
     "mongoose": "^8.8.3",
     "passport": "^0.7.0",
     "passport-github2": "^0.1.12"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/express-session": "^1.18.1",
+    "@types/mongoose": "^5.11.96",
+    "@types/node": "^22.10.1",
+    "@types/passport": "^1.0.17",
+    "@types/passport-github2": "^1.2.9",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   }
 }
