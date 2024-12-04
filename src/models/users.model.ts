@@ -9,7 +9,7 @@ const { Schema } = mongoose;
 const schema = new Schema(
   {
     name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, trim: true, unique: true },
+    email: { type: String, trim: true, unique: true },
     profile_icon: { type: String, trim: true },
     github_profile: { type: String, required: true, trim: true, unique: true },
     github_username: { type: String, required: true, trim: true, unique: true },
@@ -18,6 +18,7 @@ const schema = new Schema(
       type: Color,
       array: colors,
     },
+    github_account: { type: String },
   },
   { timestamps: true, toJSON: { virtuals: true } }
 );
@@ -33,19 +34,27 @@ const schema = new Schema(
 //   });
 // });
 
-schema.post("findOne", function (doc: any) {
-  if (doc && doc.github_access_token) {
-    console.log(
-      "🚀 ~ file: users.model.ts:38 ~ doc.github_access_token:",
-      doc.github_access_token
-    );
-    doc.github_access_token = decrypt(doc.github_access_token);
-    console.log(
-      "🚀 ~ file: users.model.ts:40 ~ doc.github_access_token:",
-      doc.github_access_token
-    );
-  }
-});
+// schema.post("findOne", function (doc: any) {
+//   if (doc && doc.github_access_token) {
+//     console.log(
+//       "🚀 ~ file: users.model.ts:38 ~ doc.github_access_token:",
+//       doc.github_access_token
+//     );
+//     doc.decrypt_github_token = decrypt(doc.github_access_token);
+//     // console.log("🚀 ~ file: users.model.ts:43 ~ decrypted:", decrypted)
+//     // console.log(
+//     //   "🚀 ~ file: users.model.ts:40 ~ doc.github_access_token:",
+//     //   doc.github_access_token
+//     // );
+//   }
+// });
+
+// schema.virtual("github_access_token_decrypted").get(function () {
+//   if (this.github_access_token) {
+//     return decrypt(this.github_access_token);
+//   }
+//   return null;
+// });
 
 const User = mongoose.model("poko_user", schema);
 

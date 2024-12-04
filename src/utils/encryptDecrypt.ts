@@ -8,8 +8,6 @@ const ENCRYPTION_KEY: string = "b2d4a28f2c8d5a9e58cb7cd5d44a34b2"; // 32 bytes k
 const IV_LENGTH: number = 16; // AES block size is 16 bytes
 
 function encrypt(text: string): string {
-  console.log("🚀 ~ file: encryptDecrypt.ts:11 ~ encrypt ~ text:", text);
-  // Generate random initialization vector (IV)
   const iv: Buffer = crypto.randomBytes(IV_LENGTH);
 
   // Create AES-256-CBC cipher
@@ -47,5 +45,12 @@ function decrypt(text: string): string {
 
   return decrypted;
 }
+
+console.log(
+  ">>> check",
+  decrypt(
+    "457435392bc2cf457a8acf8a968fc442:11d654fc78acfeeda53d89838cec2b829a6964f0b45b645f778aef3308b128833481cdbbece7ffb66aa0d32efda9ad64"
+  )
+);
 
 export { encrypt, decrypt };
