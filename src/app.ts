@@ -26,7 +26,7 @@ app.use(passport.session());
 
 interface User {
   username: string;
-  email: string | undefined;
+  email?: string;
   name: string;
   accessToken: string;
 }
