@@ -1,4 +1,4 @@
-# code-buddy-v2
+# PO-CO
 
 
 🚀 Introducing PO-CO (Pookie-Coder): Track Your Coding Streaks Across Platforms! 🌟
@@ -25,9 +25,11 @@ Together, let’s redefine how coding progress is tracked and celebrated. 🌐
 #POCO #CodingStreaks #DeveloperTools #InnovationInCoding
 
 
-In developement work
+#In developement work
 
-- elastic-search to find the questions user has solved
-- redis to fetch the user data-
+- elastic-search => find the questions user has solved
+- kafka => If many user submit the data at single point
+- redis => to fetch the data fatser
+- dokcer => to handle all this things.
 - sharding to optimise the query
 - write the complete base in typescript
