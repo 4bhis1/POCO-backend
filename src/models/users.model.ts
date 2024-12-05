@@ -18,43 +18,10 @@ const schema = new Schema(
       type: Color,
       array: colors,
     },
-    github_account: { type: String },
+    github_repo: { type: String },
   },
   { timestamps: true, toJSON: { virtuals: true } }
 );
-
-// schema.post("find", function (docs: [unknown]) {
-//   docs.forEach((doc: any) => {
-//     console.log(">>> this is to check if its here or nor", doc.github_access_token);
-//     if (doc.github_access_token) {
-//       const decrypted = decrypt(doc.github_access_token);
-//       console.log(">>> decrypted", decrypted);
-//       doc.github_access_token = decrypt(doc.github_access_token);
-//     }
-//   });
-// });
-
-// schema.post("findOne", function (doc: any) {
-//   if (doc && doc.github_access_token) {
-//     console.log(
-//       "🚀 ~ file: users.model.ts:38 ~ doc.github_access_token:",
-//       doc.github_access_token
-//     );
-//     doc.decrypt_github_token = decrypt(doc.github_access_token);
-//     // console.log("🚀 ~ file: users.model.ts:43 ~ decrypted:", decrypted)
-//     // console.log(
-//     //   "🚀 ~ file: users.model.ts:40 ~ doc.github_access_token:",
-//     //   doc.github_access_token
-//     // );
-//   }
-// });
-
-// schema.virtual("github_access_token_decrypted").get(function () {
-//   if (this.github_access_token) {
-//     return decrypt(this.github_access_token);
-//   }
-//   return null;
-// });
 
 const User = mongoose.model("poko_user", schema);
 

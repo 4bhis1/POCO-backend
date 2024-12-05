@@ -1,0 +1,24 @@
+create middleware to check user and provide user to the controller and authenticate
+
+commit the file to the repo
+
+
+apis
+  1. fetch all the questions solved
+    filter /platform
+           /difficulty
+           /question-search
+    sort / crreated 
+         / updated
+    skip
+    limit
+
+  2. fetch user profil3
+    question solved today
+    difficulty
+    platform and their signs
+
+  3. fetch user streaks data //image-return
+    return the streak of the user of past 12 months
+
+  

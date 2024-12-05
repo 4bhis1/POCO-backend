@@ -1,4 +1,5 @@
 import User from "../models/users.model";
+import { generateAccessToken } from "../utils/jwtToken";
 
 interface authenticateUserArgs {
   username: string;
@@ -9,7 +10,7 @@ interface authenticateUserArgs {
 
 export const authenticateUser = async (
   args: authenticateUserArgs
-): Promise<void> => {
+): Promise<string> => {
   const { username, email, name, accessToken } = args;
   console.log("🚀 ~ file: user.service.ts:14 ~ args:", args);
 
@@ -25,7 +26,5 @@ export const authenticateUser = async (
   const data = await user.save();
   console.log(">>> data", data);
 
-  const userData = await User.findOne({}, { github_access_token: 1, name: 1 });
-  console.log("🚀 ~ file: user.service.ts:27 ~ userData:", userData);
-
+  return generateAccessToken(data._id);
 };

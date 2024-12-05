@@ -3,14 +3,6 @@
 // const router = Router();
 
 // /**
-//  * @route GET /get-authenticated
-//  * @description This route checks if the user is authenticated.
-//  * @access Public
-//  * @returns {Object} 200 OK with user authentication status
-//  */
-// router("/get-authenticated");
-
-// /**
 //  * @route POST /create-repo
 //  * @description This route allows authenticated users to create a new GitHub repository.
 //  * @access Private
@@ -61,6 +53,10 @@
 //  *   "questionsSolvedToday": 3
 //  * }
 //  */
-// router("/user-detail");
+// router("/user-streak");
+
+
+
+Router("/user-data")
 
 // export default router;

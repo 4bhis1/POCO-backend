@@ -1,9 +1,6 @@
 import axios from "axios";
-import {
-  branchInterface,
-  commitInterface,
-  pullRequestInterface,
-} from "./interfaces";
+import { branchInterface, pullRequestInterface } from "./interfaces";
+import { precommit } from "../../constants/poco";
 
 class GitHubService {
   private access_token: string;
@@ -13,6 +10,14 @@ class GitHubService {
   constructor(access_token: string, user_name?: string, repo_name?: string) {
     this.access_token = access_token;
     this.repo_name = repo_name;
+    this.user_name = user_name;
+  }
+
+  set setRepoName(repo_name: string) {
+    this.repo_name = repo_name;
+  }
+
+  set setUserName(user_name: string) {
     this.user_name = user_name;
   }
 
@@ -29,34 +34,63 @@ class GitHubService {
   }
 
   // Helper method to construct API URL
-  private getRepoUrl(userName: string, repoName: string): string {
-    return `https://api.github.com/repos/${userName}/${repoName}`;
+  private getRepoUrl(): string {
+    return `https://api.github.com/repos/${this.user_name}/${this.repo_name}`;
   }
 
   // Commit to a GitHub repository
-  async commitToRepo(props: Omit<commitInterface, "url">): Promise<string> {
-    const { userName, repoName, commitMessage, content, branch, sha } = props;
-    const url = `${this.getRepoUrl(userName, repoName)}/contents/README.md`; // Replace README.md with the target file path
+  async commitFilesToRepo(props: {
+    files: { filePath: string; content: string }[];
+    commitMessage: string;
+    branch: string;
+  }): Promise<string> {
+    const { files, commitMessage, branch } = props;
 
-    const response = await this.makeRequest("PUT", url, {
-      message: commitMessage,
-      content: Buffer.from(content).toString("base64"),
-      branch,
-      sha,
-    });
+    for (const file of files) {
+      const { filePath, content } = file;
 
-    console.log(">> response", response);
-    return "Done";
+      // Construct the API URL for the file path
+      const url = `${this.getRepoUrl()}/contents/${filePath}`;
+
+      // Encode the content in Base64 (required by GitHub API for raw content upload)
+      const encodedContent = Buffer.from(content).toString("base64");
+
+      // Prepare data for the FormData request
+      const data = {
+        message: commitMessage,
+        content: encodedContent,
+        branch,
+      };
+
+      // Make the PUT request for each file
+      const response = await axios({
+        method: "PUT",
+        url,
+        headers: {
+          Authorization: `Bearer ${this.access_token}`,
+          "Content-Type": "application/json", // GitHub expects JSON data, not actual multipart FormData here
+        },
+        data,
+      });
+    }
+
+    return "All files committed successfully!";
   }
 
   // Create a new branch
   async createBranch(props: Omit<branchInterface, "url">): Promise<any> {
-    const { repoOwner, repoName, branchName } = props;
-    const url = `${this.getRepoUrl(repoOwner, repoName)}/git/refs`;
+    console.log(
+      ">>>> this.repoNamr this.ownener ame",
+      this.repo_name,
+      this.user_name
+    );
+
+    const { branchName } = props;
+    const url = `${this.getRepoUrl()}/git/refs`;
 
     const data = {
       ref: `refs/heads/${branchName}`,
-      sha: await this.getLatestCommitSha(repoOwner, repoName),
+      sha: await this.getLatestCommitSha(),
     };
 
     const response = await this.makeRequest("POST", url, data);
@@ -64,11 +98,8 @@ class GitHubService {
   }
 
   // Get the latest commit SHA for the default branch
-  private async getLatestCommitSha(
-    repoOwner: string,
-    repoName: string
-  ): Promise<string> {
-    const url = `${this.getRepoUrl(repoOwner, repoName)}/git/refs/heads/main`; // or 'master'
+  private async getLatestCommitSha(): Promise<string> {
+    const url = `${this.getRepoUrl()}/git/refs/heads/main`; // or 'master'
     const response = await this.makeRequest("GET", url);
     return response.object.sha;
   }
@@ -93,19 +124,16 @@ class GitHubService {
 
   // Get branch details
   async getBranch(props: branchInterface): Promise<any> {
-    const { repoOwner, repoName, branchName } = props;
-    const url = `${this.getRepoUrl(
-      repoOwner,
-      repoName
-    )}/branches/${branchName}`;
+    const { branchName } = props;
+    const url = `${this.getRepoUrl()}/branches/${branchName}`;
     const response = await this.makeRequest("GET", url);
     return response;
   }
 
   // Create a pull request
   async createPullRequest(props: pullRequestInterface): Promise<any> {
-    const { repoOwner, repoName, title, head, base } = props;
-    const url = `${this.getRepoUrl(repoOwner, repoName)}/pulls`;
+    const { title, head, base } = props;
+    const url = `${this.getRepoUrl()}/pulls`;
 
     const data = {
       title,
@@ -118,15 +146,8 @@ class GitHubService {
   }
 
   // Merge a pull request
-  async mergePullRequest(
-    repoOwner: string,
-    repoName: string,
-    pullRequestId: number
-  ): Promise<any> {
-    const url = `${this.getRepoUrl(
-      repoOwner,
-      repoName
-    )}/pulls/${pullRequestId}/merge`;
+  async mergePullRequest(pullRequestId: number): Promise<any> {
+    const url = `${this.getRepoUrl()}/pulls/${pullRequestId}/merge`;
 
     const data = {
       commit_message: `Merging PR #${pullRequestId}`,
@@ -134,6 +155,26 @@ class GitHubService {
 
     const response = await this.makeRequest("PUT", url, data);
     return response;
+  }
+
+  async makeInitialCommit(user_id: string): Promise<void> {
+    const url = `${this.getRepoUrl()}/contents/README.md`;
+
+    const data = {
+      message: "Initial commit by PO-CO",
+      content: Buffer.from(precommit(user_id)).toString("base64"),
+      branch: "main", // Specify the branch to create
+    };
+
+    try {
+      await this.makeRequest("PUT", url, data);
+    } catch (error: any) {
+      console.error(
+        "Error creating initial commit:",
+        error.response?.data || error.message
+      );
+      throw error;
+    }
   }
 }
 
