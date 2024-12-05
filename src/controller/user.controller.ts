@@ -8,13 +8,17 @@ export interface User {
   accessToken: string;
 }
 
+interface Props {
+  user?: User;
+  access_token?: string;
+}
+
 export const authenticateReponse = async (
   accessToken: string,
   refreshToken: string,
   profile: Profile,
-  done: (error: any, user?: User | false) => void
+  done: (error: any, props?: Props) => void
 ) => {
-  console.log("🚀 ~ file: app.ts:53 ~ profile:", profile);
   try {
     let email = profile.emails?.[0]?.value;
 
@@ -42,11 +46,10 @@ export const authenticateReponse = async (
     };
     console.log("🚀 ~ file: app.ts:79 ~ user:", user);
 
-    await authenticateUser(user);
+    const access_token = await authenticateUser(user);
 
-    return done(null, user);
+    return done(null, { user, access_token });
   } catch (error) {
-    return done(error, false);
+    return done(error);
   }
 };
-

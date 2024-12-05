@@ -46,11 +46,4 @@ function decrypt(text: string): string {
   return decrypted;
 }
 
-console.log(
-  ">>> check",
-  decrypt(
-    "457435392bc2cf457a8acf8a968fc442:11d654fc78acfeeda53d89838cec2b829a6964f0b45b645f778aef3308b128833481cdbbece7ffb66aa0d32efda9ad64"
-  )
-);
-
 export { encrypt, decrypt };
