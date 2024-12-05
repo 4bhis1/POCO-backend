@@ -13,7 +13,7 @@ class GitHubService {
   constructor(access_token: string, user_name?: string, repo_name?: string) {
     this.access_token = access_token;
     this.repo_name = repo_name;
-    this.user_name = this.user_name;
+    this.user_name = user_name;
   }
 
   private async makeRequest(method: string, url: string, data: any = {}) {

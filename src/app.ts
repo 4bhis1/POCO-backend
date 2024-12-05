@@ -60,7 +60,7 @@ passport.use(
           const response = await fetch("https://api.github.com/user/emails", {
             headers: {
               Authorization: `Bearer ${accessToken}`,
-              "User-Agent": "PO-KO",
+              "User-Agent": "PO-CO",
             },
           });
 
@@ -124,14 +124,19 @@ app.get("/profile", (req: Request, res: Response): void => {
   });
 });
 
-app.get("/data", async (req: Request, res: Response) => {
+app.get("/data/:timeStamp", async (req: Request, res: Response) => {
   const image = await getActivityCalendar([
     { date: "2024-01-01", activityCount: 5 },
     { date: "2024-01-02", activityCount: 2 },
     { date: "2024-01-03", activityCount: 8 },
+    { date: "2024-01-04", activityCount: 8 },
+    { date: "2024-01-05", activityCount: 3 },
   ]);
 
   res.set("Content-Type", "image/png");
+  res.set("Cache-Control", "no-store");
+  res.set("ETag", "unique-hash-value");
+  res.set("Expires", new Date().toString());
   res.send(image);
 });
 

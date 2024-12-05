@@ -7,14 +7,14 @@ const PORT: string | undefined = process.env.PORT;
 const MONGO_URI: string = process.env.MONGO_URI || "";
 
 app.listen(PORT, () => {
-  console.log(`PO-KO is running on port ${PORT}`, new Date());
+  console.log(`PO-CO is running on port ${PORT}`, new Date());
   mongoose
     .connect(MONGO_URI, { autoIndex: false })
     .then(() => {
-      console.log("Connected with PO-KO database");
+      console.log("Connected with PO-CO database");
     })
     .catch((e) => {
-      console.log("Erorr while connecting PO-KO database", e);
+      console.log("Erorr while connecting PO-CO database", e);
     });
 });
 
