@@ -2,7 +2,7 @@ import User from "../models/users.model";
 
 interface authenticateUserArgs {
   username: string;
-  email: string | undefined;
+  email?: string;
   name: string;
   accessToken: string;
 }
