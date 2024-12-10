@@ -8,9 +8,14 @@ interface authenticateUserArgs {
   accessToken: string;
 }
 
+interface response {
+  access_token : string;
+  user_id: string;
+}
+
 export const authenticateUser = async (
   args: authenticateUserArgs
-): Promise<string> => {
+): Promise<response> => {
   const { username, email, name, accessToken } = args;
   console.log("🚀 ~ file: user.service.ts:14 ~ args:", args);
 
@@ -26,5 +31,5 @@ export const authenticateUser = async (
   const data = await user.save();
   console.log(">>> data", data);
 
-  return generateAccessToken(data._id);
+  return { access_token: generateAccessToken(data._id), user_id: data._id };
 };

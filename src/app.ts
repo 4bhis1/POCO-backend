@@ -4,8 +4,8 @@ import session from "express-session";
 import passport from "passport";
 import { Strategy as GitHubStrategy } from "passport-github2";
 import { getActivityCalendar } from "./Services/chart.service";
-import { main } from "./try";
 import { authenticateReponse, User } from "./controller/user.controller";
+import router from "./routes";
 
 dotenv.config();
 
@@ -20,11 +20,11 @@ app.use(
   })
 );
 
+app.use(express.json());
+
 // Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
-
-
 
 // Serialize and Deserialize User
 passport.serializeUser((user: User, done) => done(null, user));
@@ -38,7 +38,7 @@ passport.use(
       clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
       callbackURL:
         process.env.GITHUB_CALLBACK_URL ||
-        "https://ed16-2405-201-5807-3027-fdf8-deb4-2df3-534e.ngrok-free.app/auth/github/callback",
+        "https://one-indirectly-skink.ngrok-free.app/auth/github/callback",
     },
     authenticateReponse
   )
@@ -64,9 +64,11 @@ app.get(
   (req: Request, res: Response) => {
     // On successful authentication
     console.log("Authenticated User:", req.user);
-    res.redirect("/profile"); // Redirect to a profile page or any other page
+    res.redirect(`/${req.user.user_id}/profile`); // Redirect to a profile page or any other page
   }
 );
+
+app.use("/api", router);
 
 app.get("/:user_id/data/:timeStamp", async (req: Request, res: Response) => {
   const image = await getActivityCalendar([

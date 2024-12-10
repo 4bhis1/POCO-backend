@@ -1,6 +1,13 @@
-// import { Router } from "express";
+import { Router } from "express";
+import {
+  successPage,
+  userProfile,
+  userProfileHtml,
+} from "../controller/user.controller";
+import { createRepo } from "../controller/github.controller";
+import User from "../models/users.model";
 
-// const router = Router();
+const router = Router();
 
 // /**
 //  * @route POST /create-repo
@@ -40,7 +47,9 @@
 //  *   "title": "Two Sum Problem"
 //  * }
 //  */
-// router("/submit");
+router.post("/submit", async (req, res) => {
+  console.log(">>> submit", req.headers);
+});
 
 // /**
 //  * @route GET /user-detail
@@ -55,8 +64,37 @@
 //  */
 // router("/user-streak");
 
+router.get("/:user_id/profile", async (req, res) => {
+  const { user_id } = req.params;
 
+  const data = await User.findOne(
+    { _id: user_id },
+    {
+      github_repo: 1,
+    }
+  );
+
+  if (data?.github_repo) {
+    res.send(successPage);
+  }
+
+  res.send(userProfileHtml(user_id));
+});
+
+router.post("/create-repo", async (req, res) => {
+  const { user_id, repoName, isPrivate, showSteakOnProfile } = req.body;
+  try {
+    await createRepo(user_id, repoName, isPrivate, showSteakOnProfile);
+    res.status(200).json({
+      status: "Success",
+    });
+  } catch (err: any) {
+    res.status(err.statusCode).json({
+      message: err.message,
+    });
+  }
+});
 
 // Router("/user-data")
 
-// export default router;
+export default router;
