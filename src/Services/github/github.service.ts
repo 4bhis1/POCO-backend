@@ -55,23 +55,54 @@ class GitHubService {
       // Encode the content in Base64 (required by GitHub API for raw content upload)
       const encodedContent = Buffer.from(content).toString("base64");
 
-      // Prepare data for the FormData request
-      const data = {
-        message: commitMessage,
-        content: encodedContent,
-        branch,
-      };
+      try {
+        // Check if the file exists and get its SHA
+        let sha = null;
+        try {
+          const getResponse = await axios({
+            method: "GET",
+            url,
+            headers: {
+              Authorization: `Bearer ${this.access_token}`,
+              "Content-Type": "application/json",
+            },
+            params: { ref: branch }, // Check on the correct branch
+          });
+          sha = getResponse.data.sha; // Get the SHA if the file exists
+        } catch (error: any) {
+          if (error.response && error.response.status !== 404) {
+            throw new Error(
+              `Error checking file existence: ${error.response.data.message}`
+            );
+          }
+          // If 404, file does not exist, continue to create it
+        }
 
-      // Make the PUT request for each file
-      const response = await axios({
-        method: "PUT",
-        url,
-        headers: {
-          Authorization: `Bearer ${this.access_token}`,
-          "Content-Type": "application/json", // GitHub expects JSON data, not actual multipart FormData here
-        },
-        data,
-      });
+        // Prepare data for the request
+        const data = {
+          message: commitMessage,
+          content: encodedContent,
+          branch,
+          ...(sha && { sha }), // Include SHA if the file exists
+        };
+
+        // Make the PUT request to create or update the file
+        await axios({
+          method: "PUT",
+          url,
+          headers: {
+            Authorization: `Bearer ${this.access_token}`,
+            "Content-Type": "application/json",
+          },
+          data,
+        });
+      } catch (error: any) {
+        console.error(
+          `Failed to commit file ${filePath}:`,
+          error.response?.data?.message || error.message
+        );
+        throw new Error(`Failed to commit file: ${filePath}`);
+      }
     }
 
     return "All files committed successfully!";
