@@ -20,6 +20,8 @@ const schema = new Schema(
     },
     github_repo: { type: String },
     showSteakOnProfile: Boolean,
+    repo_readme_sha: { type: String },
+    profile_readme_sha: { type: String },
   },
   { timestamps: true, toJSON: { virtuals: true } }
 );

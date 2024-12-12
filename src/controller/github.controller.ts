@@ -11,7 +11,7 @@ export const createRepo = async (
   showSteakOnProfile: boolean = false
 ) => {
   const data = await User.findOne(
-    { _id: user_id },
+  { _id: user_id },
     {
       email: 1,
       profile_icon: 1,

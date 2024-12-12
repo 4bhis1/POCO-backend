@@ -38,16 +38,43 @@ class GitHubService {
     return `https://api.github.com/repos/${this.user_name}/${this.repo_name}`;
   }
 
+  async getShaFile(url: string, branch?: string): Promise<string> {
+    let sha;
+    if (!branch) {
+      branch = "main";
+    }
+    try {
+      const getResponse = await axios({
+        method: "GET",
+        url,
+        headers: {
+          Authorization: `Bearer ${this.access_token}`,
+          "Content-Type": "application/json",
+        },
+        params: { ref: branch }, // Check on the correct branch
+      });
+      sha = getResponse.data.sha; // Get the SHA if the file exists
+    } catch (error: any) {
+      if (error.response && error.response.status !== 404) {
+        throw new Error(
+          `Error checking file existence: ${error.response.data.message}`
+        );
+      }
+      // If 404, file does not exist, continue to create it
+    }
+    return sha;
+  }
+
   // Commit to a GitHub repository
   async commitFilesToRepo(props: {
-    files: { filePath: string; content: string }[];
+    files: { filePath: string; content: string; sha?: string }[];
     commitMessage: string;
-    branch: string;
+    branch?: string;
   }): Promise<string> {
-    const { files, commitMessage, branch } = props;
+    const { files, commitMessage, branch = "main" } = props;
 
     for (const file of files) {
-      const { filePath, content } = file;
+      const { filePath, content, sha: fileSha } = file;
 
       // Construct the API URL for the file path
       const url = `${this.getRepoUrl()}/contents/${filePath}`;
@@ -57,26 +84,7 @@ class GitHubService {
 
       try {
         // Check if the file exists and get its SHA
-        let sha = null;
-        try {
-          const getResponse = await axios({
-            method: "GET",
-            url,
-            headers: {
-              Authorization: `Bearer ${this.access_token}`,
-              "Content-Type": "application/json",
-            },
-            params: { ref: branch }, // Check on the correct branch
-          });
-          sha = getResponse.data.sha; // Get the SHA if the file exists
-        } catch (error: any) {
-          if (error.response && error.response.status !== 404) {
-            throw new Error(
-              `Error checking file existence: ${error.response.data.message}`
-            );
-          }
-          // If 404, file does not exist, continue to create it
-        }
+        let sha = fileSha || (await this.getShaFile(url, branch));
 
         // Prepare data for the request
         const data = {
