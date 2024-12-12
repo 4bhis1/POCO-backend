@@ -7,7 +7,8 @@ import { decrypt } from "../utils/encryptDecrypt";
 export const createRepo = async (
   user_id: string,
   repoName: string = "PO-CO",
-  isPrivate: boolean = false
+  isPrivate: boolean = false,
+  showSteakOnProfile: boolean = false
 ) => {
   const data = await User.findOne(
     { _id: user_id },
@@ -41,6 +42,7 @@ export const createRepo = async (
         {
           $set: {
             github_repo: repoName,
+            show_streak_on_profile: showSteakOnProfile,
           },
         }
       );

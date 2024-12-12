@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "ts-node src/index.ts",
-    "start": "tsx src/index.ts --watch",
+    "start": "tsx src/try.ts --watch",
     "build": "tsc",
     "serve": "ts-node src/index.ts"
   },
@@ -22,6 +22,7 @@
     "express": "^4.21.1",
     "express-session": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
+    "kafkajs": "^2.2.4",
     "mongoose": "^8.8.3",
     "passport": "^0.7.0",
     "passport-github2": "^0.1.12"

@@ -19,6 +19,7 @@ const schema = new Schema(
       array: colors,
     },
     github_repo: { type: String },
+    showSteakOnProfile: Boolean,
   },
   { timestamps: true, toJSON: { virtuals: true } }
 );
