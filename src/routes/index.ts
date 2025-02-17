@@ -6,6 +6,8 @@ import {
 } from "../controller/user.controller";
 import { createRepo } from "../controller/github.controller";
 import User from "../models/users.model";
+import { submitService } from "../Services/submit.service";
+import languageExtensions from "../constants/languages";
 
 const router = Router();
 
@@ -47,8 +49,44 @@ const router = Router();
 //  *   "title": "Two Sum Problem"
 //  * }
 //  */
-router.post("/submit", async (req, res) => {
-  console.log(">>> submit", req.headers);
+
+interface SubmitServiceParams extends CommitSubmissionParams {
+  solution: string;
+  difficulty: string;
+  user_id: string;
+  platform: "gfg" | "leetcode" | "bfe";
+  questionName: string;
+  question: string;
+  language: keyof typeof languageExtensions;
+}
+
+router.post("/submit", async (req: any, res: Response) => {
+
+  const user_id: string = req.headers;
+  const {
+    question,
+    solution,
+    platform,
+    questionName,
+    difficulty,
+    language,
+  }: SubmitServiceParams = req.body;
+
+  try {
+    await submitService({
+      question,
+      solution,
+      platform,
+      questionName,
+      difficulty,
+      language,
+      user_id,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      message: "Problem faced while submiting the data.",
+    });
+  }
 });
 
 // /**
@@ -89,7 +127,7 @@ router.post("/create-repo", async (req, res) => {
       status: "Success",
     });
   } catch (err: any) {
-    res.status(err.statusCode).json({
+    res.status(err.statusCode || "500").json({
       message: err.message,
     });
   }

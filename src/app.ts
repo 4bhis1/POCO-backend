@@ -6,11 +6,25 @@ import { Strategy as GitHubStrategy } from "passport-github2";
 import { getActivityCalendar } from "./Services/chart.service";
 import { authenticateReponse, User } from "./controller/user.controller";
 import router from "./routes";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin);
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.sendStatus(200);
+});
 // Session Configuration
 app.use(
   session({
@@ -63,12 +77,18 @@ app.get(
   passport.authenticate("github", { failureRedirect: "/" }),
   (req: Request, res: Response) => {
     // On successful authentication
-    console.log("Authenticated User:", req.user);
-    res.redirect(`/${req.user.user_id}/profile`); // Redirect to a profile page or any other page
+    // console.log(">>> req from githubCallback", req);
+    const { user } = req;
+    console.log("Authenticated User:", user);
+    // res.redirect(`/${req.user.user_id}/profile`); // Redirect to a profile page or any other page
+    res.redirect(
+      `chrome-extension://ofdhkmlckkiadanbookopikfclnjlihl/repo-selection.html?token=${user?.access_token}&user_id=${user.user_id}`
+    );
   }
 );
 
-app.use("/api", router);
+// app.use("/api", router);
+app.use("", router);
 
 app.get("/:user_id/data/:timeStamp", async (req: Request, res: Response) => {
   const image = await getActivityCalendar([

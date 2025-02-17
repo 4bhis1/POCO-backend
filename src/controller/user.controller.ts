@@ -197,7 +197,7 @@ export const userProfileHtml = (user_id: string) => `
       loader.style.display = "block";
 
       try {
-        const response = await fetch("/api/create-repo", {
+        const response = await fetch("/create-repo", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_id: '${user_id}', repoName, isPrivate })

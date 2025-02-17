@@ -4,7 +4,7 @@ import GitHubService from "./Services/github/github.service";
 export const main = async () => {
   const accessToken = "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"; // Replace with your GitHub token
   const userName = "4bhis1"; // Replace with your GitHub username
-  const repoName = "test-repo"; // Replace with your repository name
+  const repoName = "test-repo-1"; // Replace with your repository name
 
   const gitHubService = new GitHubService(accessToken);
 
