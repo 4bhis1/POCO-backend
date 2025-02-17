@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "ts-node src/index.ts",
-    "start": "tsx src/try.ts --watch",
+    "start": "tsx src/index.ts --watch",
     "build": "tsc",
     "serve": "ts-node src/index.ts"
   },
