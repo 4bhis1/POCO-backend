@@ -8,10 +8,10 @@ export const createRepo = async (
   user_id: string,
   repoName: string = "PO-CO",
   isPrivate: boolean = false,
-  showSteakOnProfile: boolean = false
+  show_streak_profile: boolean = false
 ) => {
   const data = await User.findOne(
-  { _id: user_id },
+    { _id: user_id },
     {
       email: 1,
       profile_icon: 1,
@@ -42,7 +42,7 @@ export const createRepo = async (
         {
           $set: {
             github_repo: repoName,
-            show_streak_on_profile: showSteakOnProfile,
+            show_streak_on_profile: show_streak_profile,
           },
         }
       );
@@ -58,5 +58,3 @@ export const createRepo = async (
     throw new ApiError(500, "Github token not found");
   }
 };
-
-export const submit = async () => {};

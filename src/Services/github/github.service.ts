@@ -74,10 +74,14 @@ class GitHubService {
     const { files, commitMessage, branch = "main" } = props;
 
     for (const file of files) {
-      const { filePath, content, sha: fileSha } = file;
+      let { filePath, content, sha: fileSha } = file;
 
       // Construct the API URL for the file path
       const url = `${this.getRepoUrl()}/contents/${filePath}`;
+
+      if (typeof content !== "string") {
+        content = JSON.stringify(content);
+      }
 
       // Encode the content in Base64 (required by GitHub API for raw content upload)
       const encodedContent = Buffer.from(content).toString("base64");

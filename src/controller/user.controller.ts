@@ -24,18 +24,22 @@ export const authenticateReponse = async (
 
     // Fetch emails if not provided in the profile
     if (!email) {
-      const response = await fetch("https://api.github.com/user/emails", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "User-Agent": "PO-CO",
-        },
-      });
+      try {
+        const response = await fetch("https://api.github.com/user/emails", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "User-Agent": "PO-CO",
+          },
+        });
 
-      const emails = await response.json();
-      console.log("🚀 ~ file: app.ts:67 ~ emails:", emails);
-      // Select the primary email if available
-      const primaryEmail = emails.find((e: any) => e.primary)?.email;
-      email = primaryEmail;
+        const emails = await response.json();
+        console.log("🚀 ~ file: app.ts:67 ~ emails:", emails);
+        // Select the primary email if available
+        const primaryEmail = emails?.find((e: any) => e.primary)?.email;
+        email = primaryEmail;
+      } catch (err) {
+        //nothing
+      }
     }
 
     const user: User = {

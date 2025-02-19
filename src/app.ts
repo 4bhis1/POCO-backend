@@ -7,6 +7,9 @@ import { getActivityCalendar } from "./Services/chart.service";
 import { authenticateReponse, User } from "./controller/user.controller";
 import router from "./routes";
 import cors from "cors";
+import { authentication } from "./middleware/authentication.middleware";
+import { createStreak } from "./Services/chart/createStreak";
+import unauthenticatedApis from "./routes/unauthneitcatedRoutes";
 
 dotenv.config();
 
@@ -82,28 +85,56 @@ app.get(
     console.log("Authenticated User:", user);
     // res.redirect(`/${req.user.user_id}/profile`); // Redirect to a profile page or any other page
     res.redirect(
-      `chrome-extension://ofdhkmlckkiadanbookopikfclnjlihl/repo-selection.html?token=${user?.access_token}&user_id=${user.user_id}`
+      `chrome-extension://coidmobgbclleaaebpnpiadhddfhlkpk/repo-selection.html?token=${user?.access_token}&user_id=${user.user_id}`
     );
   }
 );
 
-// app.use("/api", router);
-app.use("", router);
+app.use("/api", authentication, router);
+// app.use("/api", unauthenticatedApis);
 
-app.get("/:user_id/data/:timeStamp", async (req: Request, res: Response) => {
-  const image = await getActivityCalendar([
-    { date: "2024-01-01", activityCount: 5 },
+app.get("/:user_id/user-streak/:type", async (req: Request, res: Response) => {
+  const { type } = req.params;
+  const { image, html } = await getActivityCalendar([
+    { date: "2024-06-10", activityCount: 5 },
     { date: "2024-01-02", activityCount: 2 },
-    { date: "2024-01-03", activityCount: 8 },
-    { date: "2024-01-04", activityCount: 8 },
+    { date: "2024-08-03", activityCount: 8 },
+    { date: "2025-01-04", activityCount: 8 },
     { date: "2024-01-05", activityCount: 3 },
   ]);
 
-  res.set("Content-Type", "image/png");
+  if (type === "image") {
+    console.log(">>>> Image in streak-profiler");
+
+    res.set("Content-Type", "image/png");
+    res.set("Cache-Control", "no-store");
+    res.set("ETag", "unique-hash-value");
+    return res.send(image);
+  } else {
+    console.log(">>>> Image in text-html");
+
+    res.set("Content-Type", "text/html");
+    res.set("Cache-Control", "no-store");
+    res.set("ETag", "unique-hash-value");
+    return res.send(html);
+  }
+});
+
+app.get("/:user_id/check", async (req: any, res: any) => {
+  const { user_id } = req.params;
+  const html = await createStreak({ user_id });
+  res.set("Content-Type", "text/html");
   res.set("Cache-Control", "no-store");
-  res.set("ETag", "unique-hash-value");
-  res.set("Expires", new Date().toString());
-  res.send(image);
+
+  res.set("Content-Type", "text/html");
+  res.set("Cache-Control", "no-store");
+
+  // Generate a dynamic ETag based on the content
+  const hash = Buffer.from(html).toString("base64").slice(0, 10); // Simple hash for ETag
+  res.set("ETag", hash);
+
+  // return res.send(html);
+  return res.send(html);
 });
 
 // Handle Errors (Optional)

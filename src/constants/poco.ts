@@ -12,8 +12,8 @@ PO-CO is your all-in-one solution for unifying, visualizing, and celebrating you
 - **Gamification:** Earn badges and stay motivated.  
 
 
-<img src="https://ed16-2405-201-5807-3027-fdf8-deb4-2df3-534e.ngrok-free.app/${user_id}/streak-map/${new Date()}" />
+<img src="https://one-indirectly-skink.ngrok-free.app/${user_id}/data/${new Date()}" />
 
 `;
 
-export const projectDescription = `PO-CO is an innovative tool designed to help developers monitor and maintain their coding streaks across multiple platforms like GitHub, LeetCode, CodePen, and more. Seamlessly track your progress, visualize your achievements, and stay motivated as you code everywhere.`
+export const projectDescription = `PO-CO is an innovative tool designed to help developers monitor and maintain their coding streaks across multiple platforms like GitHub, LeetCode, CodePen, and more. Seamlessly track your progress, visualize your achievements, and stay motivated as you code everywhere.`;

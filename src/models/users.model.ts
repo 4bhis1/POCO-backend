@@ -19,7 +19,7 @@ const schema = new Schema(
       array: colors,
     },
     github_repo: { type: String },
-    showSteakOnProfile: Boolean,
+    show_streak_profile: Boolean,
     repo_readme_sha: { type: String },
     profile_readme_sha: { type: String },
   },

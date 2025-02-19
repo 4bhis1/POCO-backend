@@ -5,6 +5,7 @@ import ApiError from "../utils/apiError";
 import { decrypt } from "../utils/encryptDecrypt";
 import GitHubService from "./github/github.service";
 import languageExtensions from "../constants/languages";
+import moment from "moment";
 
 // Utility to initialize GitHubService
 const initializeGitHubService = (
@@ -61,7 +62,7 @@ const commitProfileReadme = async ({
 interface UserProfile {
   repo_readme_sha?: string;
   profile_readme_sha?: string;
-  showSteakOnProfile: boolean;
+  show_streak_profile: boolean;
   github_profile: string;
   github_username: string;
   github_access_token: string;
@@ -70,7 +71,7 @@ interface UserProfile {
 
 const commitReadmeFile = async (
   user_id: string,
-  question: string,
+  questionName: string,
   user: UserProfile
 ): Promise<void> => {
   if (!user.github_access_token) {
@@ -102,11 +103,11 @@ const commitReadmeFile = async (
         sha: repoReadmeSha,
       },
     ],
-    commitMessage: question,
+    commitMessage: questionName,
   });
 
   // Commit to profile README if enabled
-  if (user.showSteakOnProfile && user.github_username) {
+  if (user.show_streak_profile && user.github_username) {
     const profileGitHubService = initializeGitHubService(
       user.github_access_token,
       user.github_username,
@@ -141,13 +142,45 @@ interface CommitSubmissionParams {
   questionName: string;
   question: string;
   language: keyof typeof languageExtensions;
+  solution: string;
 }
 
 interface SubmitServiceParams extends CommitSubmissionParams {
-  solution: string;
   difficulty: string;
   user_id: string;
+  user?: UserProfile;
 }
+
+const questionToString = (question: any) => {
+  if (typeof question === "string") {
+    return question;
+  }
+
+  if (!question || typeof question !== "object") {
+    return JSON.stringify(question);
+  }
+
+  const { description, examples, constraints } = question;
+
+  let result = "\n# QUESTION \n\n";
+  result += `${description}\n\n`;
+
+  if (examples && Array.isArray(examples)) {
+    result += "### EXAMPLES \n\n";
+    examples.forEach((example, index) => {
+      result += `${index + 1}. ${example}\n\n`;
+    });
+  }
+
+  if (constraints && Array.isArray(constraints)) {
+    result += "### CONSTRAINTS \n\n";
+    constraints.forEach((constraint) => {
+      result += `- ${constraint}\n`;
+    });
+  }
+
+  return result.trim();
+};
 
 const commitSubmission = async ({
   user,
@@ -155,6 +188,7 @@ const commitSubmission = async ({
   questionName,
   question,
   language,
+  solution,
 }: CommitSubmissionParams): Promise<void> => {
   const gitHubService = initializeGitHubService(
     user.github_access_token,
@@ -165,31 +199,38 @@ const commitSubmission = async ({
   await gitHubService.commitFilesToRepo({
     files: [
       {
-        filePath: `${platform}/${question}/README.md`,
-        content: questionName,
+        filePath: `${platform}/${questionName}/Question.md`,
+        content: questionToString(question),
       },
       {
-        filePath: `${platform}/${question}/$${new Date().toISOString()}$${
-          languageExtensions[language]
-        }`,
-        content: questionName,
+        filePath: `${platform}/${questionName}/Sol-${moment().format(
+          "DD-MMM-YYYY"
+        )}${languageExtensions?.[language] || ""}`,
+        content: solution,
+      },
+      {
+        filePath: `${platform}/${questionName}/Note.md`,
+        content: `# Notes`,
       },
     ],
-    commitMessage: question,
+    commitMessage: questionName,
   });
 };
 
-const submitService = async ({
-  question,
-  solution,
-  platform,
-  questionName,
-  difficulty,
-  language,
-  user_id,
-}: SubmitServiceParams): Promise<void> => {
-  // Create and save user submission
-  const github_folder_path = `${platform}/${questionName}/${solution}`;
+const submitService = async (body: SubmitServiceParams): Promise<void> => {
+  const {
+    question,
+    solution,
+    platform,
+    questionName,
+    difficulty,
+    language,
+    user_id,
+  } = body;
+  const github_folder_path = `${platform}/${questionName}/sol-${moment().format(
+    "DD-MMM-YY"
+  )}`;
+  
   const submission = new UserSubmission({
     user_id,
     question_id: questionName,
@@ -206,7 +247,7 @@ const submitService = async ({
     {
       repo_readme_sha: 1,
       profile_readme_sha: 1,
-      showSteakOnProfile: 1,
+      show_streak_profile: 1,
       github_profile: 1,
       github_username: 1,
       github_access_token: 1,
@@ -218,11 +259,22 @@ const submitService = async ({
     throw new ApiError(404, "User not found.");
   }
 
-  // Commit solution
-  await commitSubmission({ user, platform, questionName, question, language });
+  try {
+    // Commit solution
+    await commitSubmission({
+      user,
+      platform,
+      questionName,
+      question,
+      language,
+      solution,
+    });
+  } catch (err) {
+    console.log(">>> error in commit Service", err);
+  }
 
   // Commit README changes
-  await commitReadmeFile(user_id, question, user);
+  await commitReadmeFile(user_id, questionName, user);
 };
 
 export { submitService };

@@ -1,68 +1,15 @@
 import { Router } from "express";
-import {
-  successPage,
-  userProfile,
-  userProfileHtml,
-} from "../controller/user.controller";
+import { successPage, userProfileHtml } from "../controller/user.controller";
 import { createRepo } from "../controller/github.controller";
 import User from "../models/users.model";
 import { submitService } from "../Services/submit.service";
-import languageExtensions from "../constants/languages";
+import { SubmitServiceParams } from "./validation";
+import { createStreak } from "../Services/chart/createStreak";
 
 const router = Router();
 
-// /**
-//  * @route POST /create-repo
-//  * @description This route allows authenticated users to create a new GitHub repository.
-//  * @access Private
-//  * @payload {Object}
-//  * @payloadField {string} repo-name - The name of the repository to be created.
-//  * @payloadField {string} branch - The default branch for the repository (e.g., "main" or "master").
-//  * @returns {Object} 200 OK with repository creation details or error message
-//  * @example
-//  * {
-//  *   "repo-name": "new-repo",
-//  *   "branch": "main"
-//  * }
-//  */
-// router("/create-repo");
-
-// /**
-//  * @route POST /submit
-//  * @description This route receives the user's submission from an extension and records the data.
-//  * @access Private
-//  * @payload {Object}
-//  * @payloadField {string} platform - The platform where the question is solved (e.g., "LeetCode", "GeeksforGeeks").
-//  * @payloadField {string} question - The question text or description.
-//  * @payloadField {string} solution - The solution provided by the user.
-//  * @payloadField {string} difficulty - The difficulty level of the question (e.g., "Easy", "Medium", "Hard").
-//  * @payloadField {string} question_id - Unique identifier for the question.
-//  * @payloadField {string} title - Title of the question.
-//  * @returns {Object} 200 OK with submission status or error message
-//  * @example
-//  * {
-//  *   "platform": "LeetCode",
-//  *   "question": "Two Sum",
-//  *   "solution": "function twoSum(nums, target) {...}",
-//  *   "difficulty": "Medium",
-//  *   "question_id": "1a2b3c",
-//  *   "title": "Two Sum Problem"
-//  * }
-//  */
-
-interface SubmitServiceParams extends CommitSubmissionParams {
-  solution: string;
-  difficulty: string;
-  user_id: string;
-  platform: "gfg" | "leetcode" | "bfe";
-  questionName: string;
-  question: string;
-  language: keyof typeof languageExtensions;
-}
-
-router.post("/submit", async (req: any, res: Response) => {
-
-  const user_id: string = req.headers;
+router.post("/submit", async (req: any, res: any) => {
+  const user_id: string = req.user_id;
   const {
     question,
     solution,
@@ -83,27 +30,15 @@ router.post("/submit", async (req: any, res: Response) => {
       user_id,
     });
   } catch (err: any) {
+    console.log(">>> error in submit service", err);
     res.status(500).json({
       message: "Problem faced while submiting the data.",
     });
   }
 });
 
-// /**
-//  * @route GET /user-detail
-//  * @description This route retrieves the authenticated user's details, such as their streaks and questions solved today.
-//  * @access Private
-//  * @returns {Object} 200 OK with user data (streaks, questions solved today)
-//  * @example
-//  * {
-//  *   "streaks": 10,
-//  *   "questionsSolvedToday": 3
-//  * }
-//  */
-// router("/user-streak");
-
-router.get("/:user_id/profile", async (req, res) => {
-  const { user_id } = req.params;
+router.get("/:user_id/profile", async (req: any, res: any) => {
+  const user_id: string = req.user_id;
 
   const data = await User.findOne(
     { _id: user_id },
@@ -119,10 +54,12 @@ router.get("/:user_id/profile", async (req, res) => {
   res.send(userProfileHtml(user_id));
 });
 
-router.post("/create-repo", async (req, res) => {
-  const { user_id, repoName, isPrivate, showSteakOnProfile } = req.body;
+router.post("/create-repo", async (req: any, res: any) => {
+  const user_id: string = req.user_id;
+  console.log(">>> user_id", user_id);
+  const { repoName, isPrivate, show_streak_profile } = req.body;
   try {
-    await createRepo(user_id, repoName, isPrivate, showSteakOnProfile);
+    await createRepo(user_id, repoName, isPrivate, show_streak_profile);
     res.status(200).json({
       status: "Success",
     });
@@ -133,6 +70,20 @@ router.post("/create-repo", async (req, res) => {
   }
 });
 
-// Router("/user-data")
+router.get("/check", async (req: any, res: any) => {
+  const user_id: string = req.user_id;
+
+  const html = await createStreak({ isExtension: true, user_id });
+  res.set("Content-Type", "text/html");
+  res.set("Cache-Control", "no-store");
+
+  res.set("Content-Type", "text/html");
+  res.set("Cache-Control", "no-store");
+
+  // Generate a dynamic ETag based on the content
+  const hash = Buffer.from(html).toString("base64").slice(0, 10); // Simple hash for ETag
+  res.set("ETag", hash);
+  return res.send(html);
+});
 
 export default router;

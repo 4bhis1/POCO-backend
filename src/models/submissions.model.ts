@@ -11,26 +11,27 @@ const schema = new Schema(
     question_id: { type: String, required: true },
     platform: { type: String, required: true, enum: platforms },
     title: { type: String, required: true, trim: true }, //question title
-    difficulty: { type: String, enum: difficulty, default: "easy" },
+    difficulty: { type: String, default: "easy" },
     tags: [{ type: String, trim: true }],
     language: {
       type: String,
       trim: true,
       required: true,
-      enum: Object.keys(languageExtensions),
+      default: "javascript",
+      // enum: Object.keys(languageExtensions),
     },
     github_folder_path: {
       type: String,
       required: true,
       trim: true,
-      unique: true,
+      // unique: true,
     },
   },
   { timestamps: true, toJSON: { virtuals: true } }
 );
 
-schema.index({ user_id: 1 });
-schema.index({ user_id: 1, updated_at: -1 });
+// schema.index({ user_id: 1 });
+// schema.index({ user_id: 1, updated_at: -1 });
 
 const UserSubmission = mongoose.model("poko_submission", schema);
 
