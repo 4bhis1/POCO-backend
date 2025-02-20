@@ -12,7 +12,7 @@ PO-CO is your all-in-one solution for unifying, visualizing, and celebrating you
 - **Gamification:** Earn badges and stay motivated.  
 
 
-<img src="https://one-indirectly-skink.ngrok-free.app/${user_id}/data/${new Date()}" />
+<img src="https://one-indirectly-skink.ngrok-free.app/streaks/user/${user_id}?isReadme=yes" />
 
 `;
 

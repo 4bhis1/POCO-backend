@@ -52,6 +52,7 @@ export const createRepo = async (
 
       await gitHubService.makeInitialCommit(user_id);
     } catch (err: any) {
+      console.log(">>> err while creating repo for ", user_id, err);
       throw new ApiError(500, "Can't create your github repo");
     }
   } else {

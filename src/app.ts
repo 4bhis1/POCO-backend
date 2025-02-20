@@ -9,7 +9,7 @@ import router from "./routes";
 import cors from "cors";
 import { authentication } from "./middleware/authentication.middleware";
 import { createStreak } from "./Services/chart/createStreak";
-import unauthenticatedApis from "./routes/unauthneitcatedRoutes";
+import nodeHtmlToImage from "node-html-to-image";
 
 dotenv.config();
 
@@ -72,7 +72,9 @@ app.get("/health-check", (req: Request, res: Response) => {
 // GitHub Authentication Routes
 app.get(
   "/auth/github",
-  passport.authenticate("github", { scope: ["repo", "user:email"] })
+  passport.authenticate("github", {
+    scope: ["repo", "public_repo", "user:email"],
+  })
 );
 
 app.get(
@@ -85,7 +87,7 @@ app.get(
     console.log("Authenticated User:", user);
     // res.redirect(`/${req.user.user_id}/profile`); // Redirect to a profile page or any other page
     res.redirect(
-      `chrome-extension://coidmobgbclleaaebpnpiadhddfhlkpk/repo-selection.html?token=${user?.access_token}&user_id=${user.user_id}`
+      `chrome-extension://${process.env.EXTENSION_ID}/repo-selection.html?token=${user?.access_token}&user_id=${user.user_id}`
     );
   }
 );
@@ -120,9 +122,37 @@ app.get("/:user_id/user-streak/:type", async (req: Request, res: Response) => {
   }
 });
 
-app.get("/:user_id/check", async (req: any, res: any) => {
+app.get("/streaks/user/:user_id", async (req: any, res: any) => {
   const { user_id } = req.params;
-  const html = await createStreak({ user_id });
+  const { isReadme } = req.query;
+
+  const html = await createStreak({ isExtension: isReadme !== "yes", user_id });
+
+  if (isReadme === "yes") {
+    const imageBuffer = await nodeHtmlToImage({
+      html: ` <html>
+      <head>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          html, body { height : 180px;overflow: hidden; }
+          .container { display: flex; justify-content: center;flex:1 }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          ${html}
+        </div>
+      </body>
+    </html>`, // Use the generated HTML
+      encoding: "buffer", // Return the result as a Buffer
+    });
+
+    // Set appropriate response headers for image
+    res.set("Content-Type", "image/png");
+    res.set("Cache-Control", "no-store");
+    return res.send(imageBuffer);
+  }
+
   res.set("Content-Type", "text/html");
   res.set("Cache-Control", "no-store");
 

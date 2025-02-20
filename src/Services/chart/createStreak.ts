@@ -6,8 +6,7 @@ import { getLast360DaysGroupedByMonthAndWeek } from "./utils";
 const last360Callback = getLast360DaysGroupedByMonthAndWeek();
 
 export const createStreak = async ({ isExtension = true, user_id }: any) => {
-  console.log(">>> user_id", user_id);
-  const last360days = last360Callback(360);
+  const last360days = last360Callback(isExtension ? 6 * 30 : 360);
 
   let months = `<div style="display:flex; gap:2px">`;
 
