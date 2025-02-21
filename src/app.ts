@@ -91,7 +91,7 @@ app.get(
 );
 
 app.use("/api", authentication, privateRoutes);
-app.use("/api", publicRoutes);
+app.use("", publicRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
