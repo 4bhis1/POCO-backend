@@ -6,9 +6,9 @@ import { submitService } from "../Services/submit.service";
 import { SubmitServiceParams } from "./validation";
 import { createStreak } from "../Services/chart/createStreak";
 
-const router = Router();
+const privateRoutes = Router();
 
-router.post("/submit", async (req: any, res: any) => {
+privateRoutes.post("/submit", async (req: any, res: any) => {
   const user_id: string = req.user_id;
   const {
     question,
@@ -37,7 +37,7 @@ router.post("/submit", async (req: any, res: any) => {
   }
 });
 
-router.get("/:user_id/profile", async (req: any, res: any) => {
+privateRoutes.get("/:user_id/profile", async (req: any, res: any) => {
   const user_id: string = req.user_id;
 
   const data = await User.findOne(
@@ -54,7 +54,7 @@ router.get("/:user_id/profile", async (req: any, res: any) => {
   res.send(userProfileHtml(user_id));
 });
 
-router.post("/create-repo", async (req: any, res: any) => {
+privateRoutes.post("/create-repo", async (req: any, res: any) => {
   const user_id: string = req.user_id;
   console.log(">>> user_id", user_id);
   const { repoName, isPrivate, show_streak_profile } = req.body;
@@ -70,7 +70,7 @@ router.post("/create-repo", async (req: any, res: any) => {
   }
 });
 
-router.get("/check", async (req: any, res: any) => {
+privateRoutes.get("/check", async (req: any, res: any) => {
   const user_id: string = req.user_id;
 
   const html = await createStreak({ isExtension: true, user_id });
@@ -86,4 +86,4 @@ router.get("/check", async (req: any, res: any) => {
   return res.send(html);
 });
 
-export default router;
+export default privateRoutes;

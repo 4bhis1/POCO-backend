@@ -58,14 +58,14 @@ function weekHtml({ week, data }: { week: any; data: any }) {
     .map((doc: any) => {
       let color = "transparent";
 
+      const count = data[doc?.date] || 0;
       if (doc && data[doc?.date]) {
-        const count = data[doc?.date];
-        color = `rgba(61,185,117,${Math.min(count / 10, 1)})`;
+        color = `rgba(61,185,117,${Math.min((count * 2) / 10, 1)})`;
       }
       return box({
         color: doc ? color : "transparent",
         className: `border-color :${doc ? "#ebedf0" : "transparent"};`,
-        title: doc?.date || "",
+        title: count ? `Solved : ${count} ` : "" + (`${doc?.date}` || ""),
       });
     })
     .join("");
